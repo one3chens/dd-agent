@@ -13,6 +13,8 @@ def get_os():
         return 'mac'
     elif sys.platform.find('freebsd') != -1:
         return 'freebsd'
+    elif sys.platform.find('openbsd') != -1:
+        return 'openbsd'
     elif sys.platform.find('linux') != -1:
         return 'linux'
     elif sys.platform.find('win32') != -1:
@@ -47,10 +49,15 @@ class Platform(object):
         return 'linux' in name
 
     @staticmethod
+    def is_openbsd(name=None):
+        name = name or sys.platform
+        return 'openbsd' in name
+
+    @staticmethod
     def is_bsd(name=None):
         """ Return true if this is a BSD like operating system. """
         name = name or sys.platform
-        return Platform.is_darwin(name) or Platform.is_freebsd(name)
+        return Platform.is_darwin(name) or Platform.is_freebsd(name) or Platform.is_openbsd(name)
 
     @staticmethod
     def is_solaris(name=None):
@@ -65,6 +72,7 @@ class Platform(object):
             Platform.is_darwin()
             or Platform.is_linux()
             or Platform.is_freebsd()
+            or Platform.is_openbsd()
         )
 
     @staticmethod

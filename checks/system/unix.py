@@ -22,7 +22,7 @@ except ImportError:
 # project
 from checks import Check
 from utils.hostname import get_hostname
-from utils.platform import Platform
+from utils.platform import get_os, Platform
 from utils.subprocess_output import get_subprocess_output
 
 
@@ -168,7 +168,7 @@ class IO(Check):
                     for i in range(1, len(cols)):
                         io[cols[0]][self.xlate(headers[i], "sunos")] = cols[i]
 
-            elif sys.platform.startswith("freebsd"):
+            elif get_os() in ("freebsd", "openbsd"):
                 output, _, _ = get_subprocess_output(["iostat", "-x", "-d", "1", "2"], self.logger)
                 iostat = output.splitlines()
 
@@ -261,7 +261,7 @@ class Load(Check):
                 self.logger.exception('Cannot extract load')
                 return False
 
-        elif sys.platform in ('darwin', 'sunos5') or sys.platform.startswith("freebsd"):
+        elif get_os() in ('freebsd', 'mac', 'openbsd', 'solaris'):
             # Get output from uptime
             try:
                 uptime, _, _ = get_subprocess_output(['uptime'], self.logger)
@@ -440,7 +440,7 @@ class Memory(Check):
                 'swapUsed': swap.used / float(1024**2),
                 'swapFree': swap.free / float(1024**2)}
 
-        elif sys.platform.startswith("freebsd"):
+        elif get_os() in ("freebsd", "openbsd"):
             try:
                 output, _, _ = get_subprocess_output(['sysctl', 'vm.stats.vm'], self.logger)
                 sysctl = output.splitlines()
@@ -706,7 +706,7 @@ class Cpu(Check):
                     self.logger.warn("Expected to get at least 4 lines of data from iostat instead of just " + str(iostats[:max(80, len(iostats))]))
                     return False
 
-            elif sys.platform.startswith("freebsd"):
+            elif get_os() in ("freebsd", "openbsd"):
                 # generate 3 seconds of data
                 # tty            ada0              cd0            pass0             cpu
                 # tin  tout  KB/t tps  MB/s   KB/t tps  MB/s   KB/t tps  MB/s  us ni sy in id

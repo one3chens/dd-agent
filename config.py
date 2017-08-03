@@ -642,9 +642,10 @@ def get_system_stats(proc_path=None):
             output, _, _ = get_subprocess_output(['grep', 'model name', proc_cpuinfo], log)
             systemStats['cpuCores'] = len(output.splitlines())
 
-        if Platform.is_darwin(platf) or Platform.is_freebsd(platf):
+        if Platform.is_darwin(platf) or Platform.is_freebsd(platf) or Platform.is_openbsd(platf):
             output, _, _ = get_subprocess_output(['sysctl', 'hw.ncpu'], log)
             systemStats['cpuCores'] = int(output.split(': ')[1])
+
     except SubprocessOutputEmptyError as e:
         log.warning("unable to retrieve number of cpuCores. Failed with error %s", e)
 
@@ -657,6 +658,10 @@ def get_system_stats(proc_path=None):
     elif Platform.is_freebsd(platf):
         version = platform.uname()[2]
         systemStats['fbsdV'] = ('freebsd', version, '')  # no codename for FreeBSD
+
+    elif Platform.is_openbsd(platf):
+        version = platform.uname()[2]
+        systemStats['obsdV'] = ('openbsd', version, '')  # no codename for OpenBSD
 
     elif Platform.is_win32(platf):
         systemStats['winV'] = platform.win32_ver()
