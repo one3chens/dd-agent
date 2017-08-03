@@ -440,7 +440,50 @@ class Memory(Check):
                 'swapUsed': swap.used / float(1024**2),
                 'swapFree': swap.free / float(1024**2)}
 
-        elif get_os() in ("freebsd", "openbsd"):
+        elif get_os() == "openbsd":
+            memData = {}
+            # first get physical stats
+            try:
+                output, _, _ = get_subprocess_output(['sysctl', 'hw.physmem'])
+                memData['physTotal'] = int(output.split('=')[1])
+            except Exception:
+                self.logger.exception("getMemoryUsage")
+
+            # then get other memory data
+            try:
+                output, _, _ = get_subprocess_output(['vmstat', '-s'], self.logger)
+                data = output.splitlines()
+            except Exception:
+                self.logger.exception("getMemoryUsage")
+
+            meminfo = {}
+            for line in data:
+                # split on the first space, and only store
+                # if the first value is an int
+                value, desc = line.lstrip().split(' ', 1)
+                try:
+                    meminfo[desc] = int(value)
+                except:
+                    pass
+
+            pageSize = meminfo.get('bytes per page', 4096)
+            memData['physFree'] = meminfo.get('pages free') * pageSize / 1048576
+            memData['physCached'] = 0
+            memData['physUsed'] = ((meminfo.get('pages active') + meminfo.get('pages wired')) *
+                                   pageSize / 1048576)
+            memData['physUsable'] = ((meminfo.get('pages free') + meminfo.get('pages inactive')) *
+                                     pageSize / 1048576)
+
+            if memData['physTotal'] > 0:
+                memData['physPctUsable'] = float(memData['physUsable']) / float(memData['physTotal'])
+
+            memData['swapTotal'] = meminfo.get('swap pages') * pageSize / 1048576
+            memData['swapUsed'] = meminfo.get('swap pages in use') * pageSize / 1048576
+            memData['swapFree'] = memData['swapTotal'] - memData['swapUsed']
+
+            return memData
+
+        elif get_os() == "freebsd":
             try:
                 output, _, _ = get_subprocess_output(['sysctl', 'vm.stats.vm'], self.logger)
                 sysctl = output.splitlines()
