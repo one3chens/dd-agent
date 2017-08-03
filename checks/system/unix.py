@@ -445,7 +445,7 @@ class Memory(Check):
             # first get physical stats
             try:
                 output, _, _ = get_subprocess_output(['sysctl', 'hw.physmem'], self.logger)
-                memData['physTotal'] = int(output.split('=')[1])
+                memData['physTotal'] = int(output.split('=')[1]) / 1048576
             except Exception:
                 self.logger.exception("getMemoryUsage")
 
