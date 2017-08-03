@@ -756,7 +756,7 @@ class Cpu(Check):
                 # 0    69 26.71   0  0.01   0.00   0  0.00   0.00   0  0.00   2  0  0  1 97
                 # 0    78  0.00   0  0.00   0.00   0  0.00   0.00   0  0.00   0  0  0  0 100
                 iostats, _, _ = get_subprocess_output(['iostat', '-w', '3', '-c', '2'], self.logger)
-                lines = [l for l in iostats.splitlines() if len(l) > 0]
+                lines = [l.lstrip() for l in iostats.splitlines() if len(l) > 0]
                 legend = [l for l in lines if "us" in l]
                 if len(legend) == 1:
                     headers = legend[0].split()
