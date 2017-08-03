@@ -749,7 +749,7 @@ class Cpu(Check):
                     self.logger.warn("Expected to get at least 4 lines of data from iostat instead of just " + str(iostats[:max(80, len(iostats))]))
                     return False
 
-            elif get_os() in ("freebsd", "openbsd"):
+            elif get_os() == "freebsd":
                 # generate 3 seconds of data
                 # tty            ada0              cd0            pass0             cpu
                 # tin  tout  KB/t tps  MB/s   KB/t tps  MB/s   KB/t tps  MB/s  us ni sy in id
@@ -767,6 +767,33 @@ class Cpu(Check):
                     cpu_intr = get_value(headers, data, "in")
                     cpu_wait = 0
                     cpu_idle = get_value(headers, data, "id")
+                    cpu_stol = 0
+                    return format_results(cpu_user + cpu_nice, cpu_sys + cpu_intr, cpu_wait, cpu_idle, cpu_stol)
+
+                else:
+                    self.logger.warn("Expected to get at least 4 lines of data from iostat instead of just " + str(iostats[:max(80, len(iostats))]))
+                    return False
+
+            elif get_os() == "openbsd":
+                #      tty              sd0             cpu
+                # tin tout  KB/t  t/s  MB/s  us ni sy in id
+                #   0    8 12.89    0  0.00   1  0  0  0 99
+                #   0   95 10.06   11  0.11   1  0  3  0 96
+                iostats, _, _ = get_subprocess_output(['iostat', '-w', '3', '-c', '2'], self.logger)
+                lines = [l.lstrip() for l in iostats.splitlines() if len(l) > 0]
+                legend = [l for l in lines if "us" in l]
+
+                if len(legend) == 1:
+                    headers = legend[0].split()
+                    # openbsd uses rigid columns here
+                    data = lines[-1][-15:]
+                    fields = [data[i:i + 3] for i in xrange(0, len(data), 3)]
+                    cpu_user = int(fields[0])
+                    cpu_nice = int(fields[1])
+                    cpu_sys = int(fields[2])
+                    cpu_intr = int(fields[3])
+                    cpu_wait = 0
+                    cpu_idle = int(fields[4])
                     cpu_stol = 0
                     return format_results(cpu_user + cpu_nice, cpu_sys + cpu_intr, cpu_wait, cpu_idle, cpu_stol)
 
