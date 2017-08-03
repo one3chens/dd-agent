@@ -168,7 +168,7 @@ class IO(Check):
                     for i in range(1, len(cols)):
                         io[cols[0]][self.xlate(headers[i], "sunos")] = cols[i]
 
-            elif get_os() == "freebsd"
+            elif get_os() == "freebsd":
                 output, _, _ = get_subprocess_output(["iostat", "-x", "-d", "1", "2"], self.logger)
                 iostat = output.splitlines()
 
