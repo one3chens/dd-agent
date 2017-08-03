@@ -444,7 +444,7 @@ class Memory(Check):
             memData = {}
             # first get physical stats
             try:
-                output, _, _ = get_subprocess_output(['sysctl', 'hw.physmem'])
+                output, _, _ = get_subprocess_output(['sysctl', 'hw.physmem'], self.logger)
                 memData['physTotal'] = int(output.split('=')[1])
             except Exception:
                 self.logger.exception("getMemoryUsage")
