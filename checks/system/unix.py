@@ -168,7 +168,7 @@ class IO(Check):
                     for i in range(1, len(cols)):
                         io[cols[0]][self.xlate(headers[i], "sunos")] = cols[i]
 
-            elif get_os() in ("freebsd", "openbsd"):
+            elif get_os() == "freebsd"
                 output, _, _ = get_subprocess_output(["iostat", "-x", "-d", "1", "2"], self.logger)
                 iostat = output.splitlines()
 
@@ -195,7 +195,7 @@ class IO(Check):
                     io[cols[0]] = {}
                     for i in range(1, len(cols)):
                         io[cols[0]][self.xlate(headers[i], "freebsd")] = cols[i]
-            elif sys.platform == 'darwin':
+            elif get_os() in ('mac', 'openbsd'):
                 iostat, _, _ = get_subprocess_output(['iostat', '-d', '-c', '2', '-w', '1'], self.logger)
                 #          disk0           disk1          <-- number of disks
                 #    KB/t tps  MB/s     KB/t tps  MB/s
